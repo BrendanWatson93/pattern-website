@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.Heading1 {
+  @apply text-4xl text-center font-sans text-white font-bold;
+}
+
+.Productheading {
+  @apply text-4xl py-4 font-sans text-white font-bold;
+}
+
+.Blogheading {
+  @apply text-4xl font-sans text-white font-bold;
+}
+
+.Blogsubhead {
+  @apply text-xl font-sans text-white font-extrabold;
+}
+
+.Subhead {
+  @apply text-xl font-sans font-bold;
+}
+.custom_placeholder::placeholder {
+  @apply italic text-sm text-slate-400;
+}
+
+.text {
+  @apply text-white font-sans pb-2;
+}
+
+.button1 {
+  @apply text-white py-1 px-2 text-lg hover:bg-white hover:text-gray-900 rounded-lg bg-white bg-opacity-30 backdrop-filter backdrop-blur-lg;
+}
+
+.Imageblock {
+  @apply w-full aspect-[2/3] bg-slate-600 rounded-md;
+}
+
+.Imagehover {
+  @apply hover:scale-105 transition duration-500;
+}
+
+.productimage {
+  @apply w-full aspect-[2/3] bg-slate-600 rounded-md;
+}
+
+.Altimage {
+  @apply aspect-[2/3] bg-slate-600 rounded-md;
+}
+
+.Blogimage {
+  @apply aspect-square rounded-md bg-slate-600 basis-1/2;
+}
