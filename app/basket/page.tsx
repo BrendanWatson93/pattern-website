@@ -5,7 +5,13 @@ import { basketitem } from "@/types/basketitem";
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
-import type { product } from "@/types/product";
+import { loadStripe } from "@stripe/stripe-js";
+
+// Make sure to call `loadStripe` outside of a component’s render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 const Basket = () => {
   const { userId } = useAuth();
@@ -24,6 +30,37 @@ const Basket = () => {
       getProduct();
     }
   }, [userId]);
+
+  useEffect(() => {
+    // Check to see if this is a redirect back from Checkout
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("success")) {
+      console.log("Order placed! You will receive an email confirmation.");
+    }
+
+    if (query.get("canceled")) {
+      console.log(
+        "Order canceled -- continue to shop around and checkout when you’re ready."
+      );
+    }
+  }, []);
+
+  const handleCheckout = async () => {
+    if (basketItems) {
+      const stripe = await stripePromise;
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Set the content type to JSON
+        },
+        body: JSON.stringify(basketItems), // Convert the object to JSON string
+      });
+      const checkoutSession = await response.json()
+      await stripe!.redirectToCheckout({
+        sessionId: checkoutSession.id,
+      });
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r min-h-screen from-purple-900 to-blue-900">
@@ -57,10 +94,11 @@ const Basket = () => {
                     </div>
 
                     <div className="grow flex justify-between items-center">
-                      <h1 className="Subhead px-2 basis-1/2 text">{basketItem.name}</h1>
+                      <h1 className="Subhead px-2 basis-1/2 text">
+                        {basketItem.name}
+                      </h1>
                       <h1 className="text Subhead px-2">
-                        £
-                        {basketItem.price.cost}
+                        £{basketItem.price.cost}
                       </h1>
                       <button className="button1 text">REMOVE</button>
                     </div>
@@ -72,7 +110,7 @@ const Basket = () => {
       </div>
       <div className="flex justify-center py-4 mx-8">
         <h1 className="text Subhead">
-          TOTAL COST:{" "}£
+          TOTAL COST: £
           {basketItems.reduce((accumulator, basketItem) => {
             return accumulator + basketItem.price.cost;
           }, 0)}
@@ -80,8 +118,12 @@ const Basket = () => {
       </div>
 
       <div className="flex justify-center space-x-2 py-2">
-        <button className="button1 text-lg">Back to Shop</button>
-        <button className="button1 text-lg">Continue</button>
+        <button
+          className="bg-white rounded-lg px-8 py-2 bg-opacity-30 backdrop-filter backdrop-blur-lg button1"
+          onClick={handleCheckout}
+        >
+          Checkout
+        </button>
       </div>
     </div>
   );
